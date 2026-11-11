@@ -211,7 +211,12 @@ def cmd(command: list[str], output: bool = False) -> tuple[bool, str]:
         if output
         else subprocess.Popen(command)
     )
-    p.wait()
+    try:
+        p.wait(timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.wait()
+        return False, ""
 
     success, content = p.returncode == 0, ""
     if output:
